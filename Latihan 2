@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulir Pendaftaran Panitia Kegiatan XYZ</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+        }
+
+        .container {
+            width: 50%;
+            margin: auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            text-align: center;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-top: 10px;
+        }
+
+        input[type="text"] {
+            padding: 8px;
+            margin-top: 5px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            margin-top: 15px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Formulir Pendaftaran Panitia Kegiatan XYZ</h2>
+        <form id="formPanitia">
+            <label for="nama">Nama:</label>
+            <input type="text" id="nama" name="nama">
+
+            <label for="nim">NIM:</label>
+            <input type="text" id="nim" name="nim">
+
+            <label for="kelas">Kelas:</label>
+            <input type="text" id="kelas" name="kelas">
+
+            <label for="alamat">Alamat:</label>
+            <input type="text" id="alamat" name="alamat">
+
+            <button type="button" id="submitBtn">Submit</button>
+        </form>
+
+        <table id="resultTable">
+            <thead>
+                <tr>
+                    <th>Nama</th>
+                    <th>NIM</th>
+                    <th>Kelas</th>
+                    <th>Alamat</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log('Halaman telah dimuat.');
+        });
+
+        document.getElementById('submitBtn').addEventListener('click', function () {
+            const nama = document.getElementById('nama').value;
+            const nim = document.getElementById('nim').value;
+            const kelas = document.getElementById('kelas').value;
+            const alamat = document.getElementById('alamat').value;
+
+            if (nama === '' || nim === '' || kelas === '' || alamat === '') {
+                alert('Harap isi semua data!');
+                return;
+            }
+
+            const newRow = document.createElement('tr');
+            
+            const cellNama = document.createElement('td');
+            const cellNim = document.createElement('td');
+            const cellKelas = document.createElement('td');
+            const cellAlamat = document.createElement('td');
+            
+            cellNama.textContent = nama;
+            cellNim.textContent = nim;
+            cellKelas.textContent = kelas;
+            cellAlamat.textContent = alamat;
+
+            newRow.appendChild(cellNama);
+            newRow.appendChild(cellNim);
+            newRow.appendChild(cellKelas);
+            newRow.appendChild(cellAlamat);
+
+            document.getElementById('tableBody').appendChild(newRow);
+
+            document.getElementById('formPanitia').reset();
+        });
+
+        document.getElementById('nama').addEventListener('focus', function () {
+            this.style.backgroundColor = '#e0f7fa';
+        });
+
+        document.getElementById('nama').addEventListener('blur', function () {
+            this.style.backgroundColor = '';
+        });
+
+        document.getElementById('submitBtn').addEventListener('mouseover', function () {
+            this.style.backgroundColor = '#388e3c';
+        });
+
+        document.getElementById('submitBtn').addEventListener('mouseout', function () {
+            this.style.backgroundColor = '#4CAF50';
+        });
+    </script>
+</body>
+</html>
