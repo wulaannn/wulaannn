@@ -1,77 +1,49 @@
 const express = require('express');
-const mysql = require('mysql2');
 const bodyParser = require('body-parser');
+const session = require('express-session');
+const authRoutes = require('./routes/auth');
+const path = require('path');
 
-const app = express(); //menjalankan fungsi express js
-app.use(bodyParser.urlencoded({extended : false})); //memparsing informasi dalam url
+const app = express();
+
+//Set EJS sebagai template engine
+app.set('view engine', 'ejs');
+
+//Middleware
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true}));
+app.use(session({
+    secret: 'secret',
+    resave: false,
+    saveUninitialized: true
+}));
 
-const connection = mysql.createConnection({ //membuat koneksi MySQL
-    host: 'localhost',
-    user: 'root',
-    password: '',
-    database: 'database5'
-});
+//Set static folder
+app.use(express.static(path.join(__dirname, 'public')));
 
-connection.connect((err) => { //mengirim koneksi connect atau tidak
-    if(err) {
-        console.log("Terjadi kesalahan dalam kondeksi ke MySQL:", err.stack)
-        return;
+//Middleware to check login status
+app.use ((req, res, next) => {
+    if (!req.session.user && req.path !== '/auth/login' && req.path !== '/auth/register'){
+        return res.redirect('/auth/login');
+    } else if (req.session.user && req.path === '/'){
+        return res.redirect('/auth/profile');
     }
-    console.log("Koneksi MySQL berhasil dengan id" + connection.threadId)
+    next();
 });
 
-app.set('view engine', 'ejs'); //rooting memberikan informasi rute app.js akan membuka file
+//Routes
+app.get('/auth', authRoutes);
 
-//ini adalah routing (Create, Read, Update, Delete)
-
-//Read
-app.get('/', (req, res) => { //menampilkan data didalam index
-    const query = 'SELECT * FROM users';
-    connection.query(query, (err, results) => {
-        res.render('index', {users: results});
-    });
+//Root Route: Redirect to /auth/login or /auth/profile based on session
+app.get('/', (req, res) => {
+    if (req.session.user) {
+        return res.redirect('/auth/profile');
+    } else {
+        return res.redirect('/auth/login');
+    }
 });
 
-//create / input / insert
-app.post('/add', (req, res) => {
-    const { nama, email, phone } = req.body;
-    const query = 'INSERT INTO users (nama, email, phone) VALUES (?,?,?)';
-    connection.query(query, [ nama, email, phone ], (err, result) => {
-        if(err) throw err;
-        res.redirect('/')
-    });
-});
-
-//update
-// untuk akses halaman
-app.get('/edit/:id', (req, res) => {
-    const query = 'SELECT * FROM users WHERE id = ?';
-    connection.query(query, [req.params.id], (err, result) => {
-        if(err) throw err;
-        res.render('edit', {user: result[0]});
-    });
-});
-
-//untuk update data
-app.post('/update/:id', (req, res) => {
-    const { nama, email, phone } = req.body;
-    const query = 'UPDATE users SET nama = ?, email = ?, phone = ? WHERE id = ?';
-    connection.query(query, [nama, email, phone, req.params.id], (err, result) => {
-        if(err) throw err;
-        res.redirect('/');
-    });
-});
-
-//menghapus hapus data
-app.get('/delete/:id', (req, res) => {
-    const query = 'DELETE FROM users WHERE id = ?';
-    connection.query(query, [req.params.id], (err, result) => {
-        if(err) throw err;
-        res.redirect('/');
-    });
-});
-
-app.listen(3000,() =>{
-    console.log("Server berjalan di port 3000, buka web melalui http://localhost:3000")
+//Menjalankan Server
+app.listen(3000, () => {
+    console.log('Server running on port 3000');
 });
