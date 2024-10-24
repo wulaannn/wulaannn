@@ -1,0 +1,86 @@
+const express = require('express');
+const mysql = require('mysql2');
+const bodyParser = require('body-parser');
+const app = express();
+
+// Menyiapkan ejs sebagai tampilan
+app.set('view engine', 'ejs');
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(express.static('public'));
+
+// Koneksi MySQL
+const db = mysql.createConnection({
+  host: 'localhost',
+  user: 'root',
+  password: '',
+  database: 'bookdb'
+});
+
+db.connect((err) => {
+  if (err) {
+    console.log('Database connection error:', err);
+  } else {
+    console.log('Database connected successfully!');
+  }
+});
+
+// rute
+
+// Menampilkan semua buku (Read)
+app.get('/', (req, res) => {
+  const query = 'SELECT * FROM books';
+  db.query(query, (err, results) => {
+    if (err) throw err;
+    res.render('index', { books: results });
+  });
+});
+
+// Menampilkan form untuk menambahkan buku baru (Create)
+app.get('/add', (req, res) => {
+  res.render('add');
+});
+
+// Menambahkan buku baru ke database
+app.post('/add', (req, res) => {
+  const { title, author, genre, year_published } = req.body;
+  const query = 'INSERT INTO books (title, author, genre, year_published) VALUES (?, ?, ?, ?)';
+  db.query(query, [title, author, genre, year_published], (err, result) => {
+    if (err) throw err;
+    res.redirect('/');
+  });
+});
+
+// Menampilkan form untuk mengedit buku (Update)
+app.get('/edit/:id', (req, res) => {
+  const id = req.params.id;
+  const query = 'SELECT * FROM books WHERE id = ?';
+  db.query(query, [id], (err, result) => {
+    if (err) throw err;
+    res.render('edit', { book: result[0] });
+  });
+});
+
+// Mengupdate data buku
+app.post('/edit/:id', (req, res) => {
+  const { title, author, genre, year_published } = req.body;
+  const id = req.params.id;
+  const query = 'UPDATE books SET title = ?, author = ?, genre = ?, year_published = ? WHERE id = ?';
+  db.query(query, [title, author, genre, year_published, id], (err, result) => {
+    if (err) throw err;
+    res.redirect('/');
+  });
+});
+
+// Menghapus Buku (Delete)
+app.get('/delete/:id', (req, res) => {
+  const id = req.params.id;
+  const query = 'DELETE FROM books WHERE id = ?';
+  db.query(query, [id], (err, result) => {
+    if (err) throw err;
+    res.redirect('/');
+  });
+});
+
+app.listen(3000,() =>{
+    console.log("Server berjalan di port 3000, buka web melalui http://localhost:3000")
+});
